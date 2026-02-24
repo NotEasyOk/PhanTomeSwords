@@ -1,18 +1,8 @@
-# ==========================================
-#        PhanTom Swords - Core Config
-# ==========================================
-
-# ------------------------------------------
-# Sword Definitions (Recipes & Cooldowns)
-# ------------------------------------------
-# Har action (Left, Right, Shift) ka cooldown alag se set karein (seconds mein).
-# Custom Model Data has been removed as per your request.
-# ------------------------------------------
-
 swords:
   PHANTOM_BLADE:
     name: "&4&lPhanTom Blade"
     material: "NETHERITE_SWORD"
+    custom_model_data: 1001
     lore:
       - "&7Type: &cCurse Power"
       - "&f» &eL: &7Rapid Slash"
@@ -36,6 +26,7 @@ swords:
   SHADOW_BLADE:
     name: "&8&lShadow Blade"
     material: "NETHERITE_SWORD"
+    custom_model_data: 1002
     lore:
       - "&7Type: &8Soul Power"
       - "&f» &eL: &7Soul Slash"
@@ -59,6 +50,7 @@ swords:
   FIRE_LIGHTER:
     name: "&6&lFire Lighter"
     material: "NETHERITE_SWORD"
+    custom_model_data: 1003
     lore:
       - "&7Type: &6Elemental"
       - "&f» &eL: &7Thunder Strike"
