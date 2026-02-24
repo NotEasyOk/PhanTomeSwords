@@ -1,60 +1,62 @@
-package your.package.name;
+package com.phantom.swords;
 
 import org.bukkit.*;
 import org.bukkit.boss.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
+import org.bukkit.persistence.PersistentDataType;
 
-public class RitualManager implements Listener, org.bukkit.command.CommandExecutor {
+public class RitualManager implements Listener {
 
     @EventHandler
     public void onCraft(CraftItemEvent event) {
         ItemStack result = event.getRecipe().getResult();
-        if (!result.hasItemMeta() || !result.getItemMeta().getPersistentDataContainer().has(PhanTomCore.SWORD_KEY, org.bukkit.persistence.PersistentDataType.STRING)) return;
+        // Link with PhanTomCore Sword Key
+        if (!result.hasItemMeta() || !result.getItemMeta().getPersistentDataContainer().has(PhanTomCore.SWORD_KEY, PersistentDataType.STRING)) return;
 
-        event.setCancelled(true);
-        event.getInventory().setMatrix(new ItemStack[9]);
+        event.setCancelled(true); // Inventory mein turant nahi aayegi
+        event.getInventory().setMatrix(new ItemStack[9]); // Items consume ho jayenge
+        
         startRitual((Player) event.getWhoClicked(), event.getInventory().getLocation(), result);
     }
 
     public void startRitual(Player p, Location loc, ItemStack sword) {
-        String type = sword.getItemMeta().getDisplayName();
-        BossBar bar = Bukkit.createBossBar("§6Awakening: " + type, BarColor.PURPLE, BarStyle.SEGMENTED_20);
+        String displayName = sword.getItemMeta().getDisplayName();
+        BossBar bar = Bukkit.createBossBar("§6Awakening: " + displayName, BarColor.PURPLE, BarStyle.SEGMENTED_20);
         Bukkit.getOnlinePlayers().forEach(bar::addPlayer);
 
-        ArmorStand as = loc.getWorld().spawn(loc.clone().add(0.5, 5, 0.5), ArmorStand.class, s -> {
-            s.setVisible(false); s.setGravity(false); s.getEquipment().setItemInMainHand(sword);
+        // Sword Floating Effect
+        ArmorStand as = loc.getWorld().spawn(loc.clone().add(0.5, 1.5, 0.5), ArmorStand.class, s -> {
+            s.setVisible(false);
+            s.setGravity(false);
+            s.getEquipment().setItemInMainHand(sword);
+            s.setCustomNameVisible(false);
         });
 
         new BukkitRunnable() {
-            int time = 900;
+            int time = 900; // 15 Minutes (900 seconds)
             public void run() {
                 if (time <= 0) {
                     loc.getWorld().strikeLightning(loc);
                     loc.getWorld().spawnParticle(Particle.EXPLOSION_HUGE, loc, 5);
-                    loc.getWorld().dropItemNaturally(loc, sword);
-                    bar.removeAll(); as.remove(); cancel(); return;
+                    loc.getWorld().dropItemNaturally(loc.clone().add(0, 1, 0), sword);
+                    bar.removeAll();
+                    as.remove();
+                    cancel();
+                    return;
                 }
-                as.setRotation(as.getLocation().getYaw() + 15f, 0);
-                loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc.clone().add(0.5, 5, 0.5), 10, 0.5, 0.5, 0.5, 0.05);
+                
+                // Animation logic
+                as.setRotation(as.getLocation().getYaw() + 10f, 0);
+                loc.getWorld().spawnParticle(Particle.DRAGON_BREATH, loc.clone().add(0.5, 1.8, 0.5), 5, 0.2, 0.2, 0.2, 0.02);
+                
                 bar.setProgress(time / 900.0);
-                bar.setTitle("§6§l" + type + " §f| §c" + (time/60) + "m §f| §e" + loc.getBlockX() + " " + loc.getBlockZ());
+                bar.setTitle("§6§l" + displayName + " §f| §c" + (time/60) + "m §f| §eX: " + loc.getBlockX() + " Z: " + loc.getBlockZ());
                 time--;
             }
         }.runTaskTimer(PhanTomCore.get(), 0, 20);
     }
-
-    @Override
-    public boolean onCommand(org.bukkit.command.CommandSender s, org.bukkit.command.Command c, String l, String[] a) {
-        if (a[0].equalsIgnoreCase("give") && s.isOp()) {
-            Player t = Bukkit.getPlayer(a[1]);
-            if (a[2].equals("anime")) t.getInventory().addItem(PhanTomCore.createLegendary("ANIME", "§c§lPhanTom Blade", 1001, Color.RED));
-            if (a[2].equals("shadow")) t.getInventory().addItem(PhanTomCore.createLegendary("SHADOW", "§8§lShadow Blade", 1002, Color.BLACK));
-            if (a[2].equals("fire")) t.getInventory().addItem(PhanTomCore.createLegendary("FIRE", "§6§lFire Lighter", 1003, Color.ORANGE));
-        }
-        return true;
-    }
-    }
+                    }
