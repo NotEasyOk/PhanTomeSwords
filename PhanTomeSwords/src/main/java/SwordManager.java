@@ -16,11 +16,9 @@ import java.util.UUID;
 
 public class SwordManager implements Listener {
 
-    // Alag-alag cooldown track karne ke liye
     private final HashMap<UUID, HashMap<String, Long>> actionCooldowns = new HashMap<>();
 
     public SwordManager() {
-        // Action Bar Update Task
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -35,19 +33,23 @@ public class SwordManager implements Listener {
     }
 
     private void sendFancyActionBar(Player p) {
-        // Format: L [||||] ✓ R [||||] ✓ S [||||] ✓
         String bar = "§fL " + getIcon(p, "LEFT") + " §fR " + getIcon(p, "RIGHT") + " §fS " + getIcon(p, "ULT");
         p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(bar));
     }
 
+    // UPDATED: Linked to Config Cooldowns (Line 41-55)
     private String getIcon(Player p, String action) {
+        String type = getSwordType(p.getInventory().getItemInMainHand());
         long last = actionCooldowns.getOrDefault(p.getUniqueId(), new HashMap<>()).getOrDefault(action, 0L);
-        int maxCD = PhanTomCore.get().getConfig().getInt("swords_settings.cooldown", 35);
+        
+        // Dynamic path for Left, Right, and Shift
+        String path = "swords." + type + ".cooldowns." + (action.equalsIgnoreCase("ULT") ? "shift" : action.toLowerCase());
+        int maxCD = PhanTomCore.get().getConfig().getInt(path, 35);
+        
         long diff = (System.currentTimeMillis() - last) / 1000;
 
         if (diff >= maxCD) return "§8[§f||||||§8] §a✓";
         
-        // Progress bar calculation
         int segments = (int) ((double) diff / maxCD * 6);
         StringBuilder progress = new StringBuilder("§8[§f");
         for (int i = 0; i < 6; i++) {
@@ -58,10 +60,15 @@ public class SwordManager implements Listener {
         return progress.toString();
     }
 
+    // UPDATED: Linked to Config Cooldowns (Line 64-75)
     private boolean checkCD(Player p, String action) {
+        String type = getSwordType(p.getInventory().getItemInMainHand());
         HashMap<String, Long> pCds = actionCooldowns.computeIfAbsent(p.getUniqueId(), k -> new HashMap<>());
         long last = pCds.getOrDefault(action, 0L);
-        int maxCD = PhanTomCore.get().getConfig().getInt("swords_settings.cooldown", 35);
+        
+        // Dynamic path check
+        String path = "swords." + type + ".cooldowns." + (action.equalsIgnoreCase("ULT") ? "shift" : action.toLowerCase());
+        int maxCD = PhanTomCore.get().getConfig().getInt(path, 35);
 
         if (System.currentTimeMillis() - last < maxCD * 1000L) return false;
 
@@ -69,7 +76,7 @@ public class SwordManager implements Listener {
         return true;
     }
 
-    // --- 1. PHANTOM BLADE (Curse Power) ---
+    // --- 1. PHANTOM BLADE ---
     private void executePhanTomBlade(Player p, String action) {
         switch (action) {
             case "RIGHT":
@@ -102,7 +109,7 @@ public class SwordManager implements Listener {
         }
     }
 
-    // --- 2. SHADOW BLADE (Soul Power) ---
+    // --- 2. SHADOW BLADE ---
     private void executeShadowBlade(Player p, String action) {
         switch (action) {
             case "RIGHT":
@@ -130,7 +137,7 @@ public class SwordManager implements Listener {
         }
     }
 
-    // --- 3. FIRE LIGHTER BLADE (Fire + Lightning) ---
+    // --- 3. FIRE LIGHTER BLADE ---
     private void executeFireLighter(Player p, String action) {
         switch (action) {
             case "RIGHT":
@@ -159,7 +166,6 @@ public class SwordManager implements Listener {
         }
     }
 
-    // --- HANDLERS ---
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
@@ -198,4 +204,4 @@ public class SwordManager implements Listener {
     private void damageNearby(Player p, double r, double d) {
         p.getNearbyEntities(r, r, r).forEach(e -> { if (e instanceof LivingEntity && e != p) ((LivingEntity) e).damage(d, p); });
     }
-                                           }
+            }
