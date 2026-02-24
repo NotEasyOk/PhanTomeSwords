@@ -17,6 +17,7 @@ import java.util.UUID;
 public class SwordManager implements Listener {
 
     private final HashMap<UUID, HashMap<String, Long>> actionCooldowns = new HashMap<>();
+    private final PlayerDataManager dataManager = new PlayerDataManager();
 
     public SwordManager() {
         new BukkitRunnable() {
@@ -183,6 +184,24 @@ public class SwordManager implements Listener {
         if (type != null && p.isSneaking()) {
             e.setCancelled(true);
             if (checkCD(p, "ULT")) handleChoice(p, type, "ULT");
+        }
+    }
+
+    // --- DATA SAVING HANDLERS ---
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        // File se purana cooldown load karke memory mein daal dega
+        actionCooldowns.put(uuid, dataManager.loadCooldowns(uuid));
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        if (actionCooldowns.containsKey(uuid)) {
+            // Player ke leave karte hi data file mein save ho jayega
+            dataManager.saveCooldowns(uuid, actionCooldowns.get(uuid));
+            actionCooldowns.remove(uuid); 
         }
     }
 
