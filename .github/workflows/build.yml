@@ -22,10 +22,11 @@ jobs:
         cache: maven
 
     - name: Build with Maven
+      # Isse target folder clean hoga aur nayi JAR banegi
       run: mvn clean package --file pom.xml
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: PhanTomSwords-Jar
+        name: PhanTomSwords-Plugin
         path: target/*.jar
