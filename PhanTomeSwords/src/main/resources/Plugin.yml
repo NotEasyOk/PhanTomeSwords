@@ -1,6 +1,6 @@
 name: PhanTomSwords
 version: 1.0
-main: com.phantom.swords.PhanTomCore
+main: swords.PhanTomeSwords
 api-version: 1.21
 author: PhanTom
 description: Legendary swords with custom rituals.
